@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Warehouse Shipping Calculator — Live</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-dark:#0b1220; --text-dark:#e5e7eb; --card-dark:#111827; --muted:#94a3b8;
+      --bg-light:#f7fafc; --text-light:#0f172a; --card-light:#ffffff;
+      --border-dark:#1f2937; --border-light:#e2e8f0;
+      --btn-dark:#141a27; --btn-dark-hover:#1b2333; --btn-dark-active:#121a29; --btn-dark-border:#334155; --btn-dark-text:#e5e7eb;
+      --btn-light:#ffffff; --btn-light-hover:#f3f4f6; --btn-light-active:#e5e7eb; --btn-light-border:#cbd5e1; --btn-light-text:#111827;
+      --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;}
+    body.dark{background:var(--bg-dark); color:var(--text-dark);}
+    body.light{background:var(--bg-light); color:var(--text-light);}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px;}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .title{display:flex;align-items:center;gap:12px}
+    .logo{width:36px;height:36px;border-radius:10px;border:1px solid var(--border-light);display:grid;place-items:center;color:inherit;font-weight:800;background:transparent}
+    body.dark .logo{border-color:var(--border-dark)}
+    h1{margin:0;font-size:22px}
+    .badge{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border-dark);background:transparent;border-radius:999px;padding:4px 10px;font-size:12px;color:inherit}
+    body.light .badge{border-color:var(--border-light)}
+    .card{border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.06);padding:16px;margin-bottom:14px;border:1px solid var(--border-dark);background:var(--card-dark)}
+    body.light .card{background:var(--card-light); border-color:var(--border-light)}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(4,1fr)}
+    label{font-size:12px;color:var(--muted)}
+    input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--btn-dark-border);background:#0b1426;color:#e5e7eb}
+    body.light input, body.light select{background:#fff;color:#0f172a;border-color:var(--btn-light-border)}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--btn-dark-border);background:var(--btn-dark);color:var(--btn-dark-text);cursor:pointer;transition:background .15s, box-shadow .15s, filter .15s}
+    .btn:hover{background:var(--btn-dark-hover)}
+    .btn:active{background:var(--btn-dark-active)}
+    .btn:focus{outline:none; box-shadow:0 0 0 2px rgba(148,163,184,.5)}
+    body.light .btn{background:var(--btn-light); color:var(--btn-light-text); border-color:var(--btn-light-border)}
+    body.light .btn:hover{background:var(--btn-light-hover)}
+    body.light .btn:active{background:var(--btn-light-active)}
+    .btn.primary{font-weight:600}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--border-dark);text-align:center}
+    body.light th, body.light td{border-color:var(--border-light)}
+    th{color:#93a3b8} body.light th{color:#334155}
+    tr:hover{background:#0e172c} body.light tr:hover{background:#f1f5f9}
+    .good{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    #err{white-space:pre-wrap;color:#fca5a5;font-size:12px;margin-top:8px}
+    .row{display:flex;gap:10px;align-items:center}
+  </style>
+</head>
+<body class="dark">
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <div class="logo">O</div>
+        <div>
+          <h1>Warehouse Shipping Calculator — Live</h1>
+          <div style="font-size:12px;color:#93a3b8;margin-top:4px">DHL, UPS, FedEx, DPD, Hermes, GLS, PostNL, Royal Mail, Correos, Poste Italiane</div>
+        </div>
+      </div>
+      <div class="row">
+        <button id="modeToggle" class="btn" title="Light/Dark">☀️</button>
+        <div class="badge" id="mode">Checking…</div>
+        <div class="badge" id="chosenWh">No warehouse selected</div>
+      </div>
+    </header>
+
+    <div id="ping" class="badge" style="display:none;margin-bottom:10px"></div>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label>Origin (Warehouse)</label>
+          <select id="origin"><option value="auto">Auto (recommended)</option></select>
+        </div>
+        <div>
+          <label>Destination Country</label>
+          <select id="toCountry">
+            <option value="DE">Germany</option><option value="FR">France</option>
+            <option value="ES">Spain</option><option value="NL">Netherlands</option>
+            <option value="IT">Italy</option><option value="GB">United Kingdom</option>
+            <option value="US">United States</option>
+          </select>
+        </div>
+        <div><label>Destination ZIP/City</label><input id="toZip" placeholder="e.g., 75001 or Paris"></div>
+        <div></div>
+      </div>
+
+      <div class="grid" style="margin-top:12px">
+        <div><label>Weight (kg)</label><input id="w" type="number" step="0.1" value="1.2"></div>
+        <div><label>Length (cm)</label><input id="l" type="number" step="0.1" value="20"></div>
+        <div><label>Width (cm)</label><input id="wi" type="number" step="0.1" value="15"></div>
+        <div><label>Height (cm)</label><input id="h" type="number" step="0.1" value="10"></div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="getRates">Get Rates</button>
+        <span class="good" id="recFast"></span>
+        <span class="good" id="recCheap"></span>
+      </div>
+      <div id="err"></div>
+    </div>
+
+    <div class="card">
+      <table id="tbl">
+        <thead><tr><th>Carrier</th><th>Service</th><th>Price</th><th>ETA (days)</th><th>Warehouse</th><th>Action</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <footer class="badge">
+      <span id="footnote"></span>
+    </footer>
+  </div>
+
+<script>
+function setMode(mode){ document.body.classList.remove("dark","light"); document.body.classList.add(mode); localStorage.setItem("mode",mode); q("#modeToggle").textContent = mode==="dark"?"☀️":"🌙"; }
+(function(){ const m = localStorage.getItem("mode")||"dark"; setMode(m); })();
+function q(s){return document.querySelector(s)}; function v(s){return q(s).value.trim()}
+q("#modeToggle").addEventListener("click", ()=>{ setMode(document.body.classList.contains("dark")?"light":"dark"); });
+
+async function ping(){
+  try{
+    const res=await fetch('/.netlify/functions/ping'); const txt=await res.text();
+    const ok = res.ok && txt.includes("pong");
+    const el = q("#ping"); el.style.display="inline-flex";
+    el.textContent = ok? "Functions OK" : "Functions missing (404) — use GitHub or Netlify CLI";
+    el.style.borderColor = ok? "#15803d":"#7f1d1d";
+  }catch(e){
+    const el = q("#ping"); el.style.display="inline-flex"; el.textContent = "Functions check failed"; el.style.borderColor="#7f1d1d";
+  }
+}
+
+async function loadWarehouses(){
+  const res = await fetch('/data/warehouses.json'); const data = await res.json();
+  const sel = document.getElementById('origin');
+  data.warehouses.forEach(w => { const opt=document.createElement('option'); opt.value=w.id; opt.textContent=`${w.name} (${w.country})`; sel.appendChild(opt); });
+  window.__WAREHOUSES__ = data.warehouses;
+}
+
+function setHeaderMode(m){
+  q("#mode").textContent = m==="live" ? "Live via Shippo" : "Demo mode";
+  q("#footnote").textContent = m==="live" ? "Live quotes via Shippo (token set)." : "Demo quotes computed client-side. Add SHIPPO_API_TOKEN to enable Live.";
+}
+
+async function fetchRates(){
+  const body = { origin: v("#origin"), toCountry: v("#toCountry"), toZip: v("#toZip"),
+    parcel: { weight:+v("#w")||1, length:+v("#l")||20, width:+v("#wi")||15, height:+v("#h")||10, mass_unit:"kg", distance_unit:"cm" } };
+  const res = await fetch('/.netlify/functions/quote', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const text = await res.text(); let data;
+  try{ data=JSON.parse(text) } catch(e){ throw new Error(`Unexpected response ${res.status}:\n${text.slice(0,200)}`); }
+  if(!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  setHeaderMode(data.mode); q("#chosenWh").textContent = `Chosen: ${data.chosen?.name || '-'}`; return data;
+}
+
+function render(data){
+  const tb=q("#tbl tbody"); tb.innerHTML="";
+  const rates=data.rates||[]; if(!rates.length){tb.innerHTML=`<tr><td colspan="6" class="warn">No rates</td></tr>`; return;}
+  rates.sort((a,b)=>a.amount-b.amount);
+  const cheapest = rates[0]; const fastest = rates.reduce((a,b)=> a.eta_days<=b.eta_days? a : b);
+  q("#recCheap").textContent = `Cheapest: ${cheapest.carrier} ${cheapest.service} (€${cheapest.amount.toFixed(2)})`;
+  q("#recFast").textContent = `Fastest: ${fastest.carrier} ${fastest.service} (${fastest.eta_days}d)`;
+  rates.forEach(r=>{
+    const disabled = !r.rate_id && data.mode==="live";
+    const title = disabled ? "rate_id missing (cannot buy label)" : "Create Label";
+    const btn = `<button class='btn mklabel' data-rate='${r.rate_id||""}' title='${title}' ${disabled?"disabled":""}>Create Label</button>`;
+    tb.innerHTML += `<tr><td>${r.carrier}</td><td>${r.service||"-"}</td><td>€ ${r.amount.toFixed(2)}</td><td>${r.eta_days??"-"}</td><td>${data.chosen?.id||"-"}</td><td>${btn}</td></tr>`;
+  });
+  document.querySelectorAll(".mklabel").forEach(b=> b.addEventListener("click", async()=>{
+    b.disabled=true; b.textContent="Creating...";
+    const payload = { rate_id: b.dataset.rate };
+    const res=await fetch('/.netlify/functions/buy_label',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const txt=await res.text(); let out; try{ out=JSON.parse(txt)}catch(e){ alert(txt.slice(0,200)); b.disabled=false; b.textContent="Create Label"; return;}
+    if(!res.ok){ alert(out.error||"Error"); b.disabled=false; b.textContent="Create Label"; return;}
+    window.open(out.label_url, "_blank"); b.textContent="Label Ready";
+  }));
+}
+
+document.getElementById("getRates").addEventListener("click", async()=>{
+  q("#err").textContent=""; q("#tbl tbody").innerHTML = `<tr><td colspan="6">Loading…</td></tr>`;
+  try{ const data=await fetchRates(); render(data); }catch(e){ q("#tbl tbody").innerHTML=""; q("#err").textContent=String(e); }
+});
+
+ping(); loadWarehouses(); setHeaderMode("demo");
+</script>
+</body>
+</html>

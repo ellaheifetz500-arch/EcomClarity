@@ -1,0 +1,80 @@
+{
+  "warehouses": [
+    {
+      "id": "BER",
+      "name": "Berlin DC",
+      "country": "DE",
+      "zip": "10115",
+      "cutoff_hour": 16,
+      "carriers_allowed": [
+        "DHL",
+        "UPS",
+        "FedEx",
+        "DPD",
+        "Hermes",
+        "GLS",
+        "PostNL",
+        "Royal Mail",
+        "Correos",
+        "Poste Italiane"
+      ]
+    },
+    {
+      "id": "PAR",
+      "name": "Paris DC",
+      "country": "FR",
+      "zip": "75001",
+      "cutoff_hour": 17,
+      "carriers_allowed": [
+        "DHL",
+        "UPS",
+        "FedEx",
+        "DPD",
+        "GLS",
+        "Hermes",
+        "Royal Mail",
+        "PostNL",
+        "Correos",
+        "Poste Italiane"
+      ]
+    },
+    {
+      "id": "MAD",
+      "name": "Madrid DC",
+      "country": "ES",
+      "zip": "28001",
+      "cutoff_hour": 16,
+      "carriers_allowed": [
+        "DHL",
+        "UPS",
+        "FedEx",
+        "DPD",
+        "GLS",
+        "Correos",
+        "Hermes",
+        "PostNL",
+        "Royal Mail",
+        "Poste Italiane"
+      ]
+    },
+    {
+      "id": "AMS",
+      "name": "Amsterdam DC",
+      "country": "NL",
+      "zip": "1012",
+      "cutoff_hour": 16,
+      "carriers_allowed": [
+        "DHL",
+        "UPS",
+        "FedEx",
+        "DPD",
+        "GLS",
+        "PostNL",
+        "Hermes",
+        "Royal Mail",
+        "Correos",
+        "Poste Italiane"
+      ]
+    }
+  ]
+}
